@@ -53,7 +53,11 @@ export default function LeaderboardPage() {
       .then(data => setProfiles(data.profiles || []));
   }, []);
 
-  const sorted = [...profiles].sort((a, b) => (a as any).xp - (b as any).xp);
+  const sorted = [...profiles].sort((a, b) => {
+    const xpA = (a as { xp: number }).xp;
+    const xpB = (b as { xp: number }).xp;
+    return xpB - xpA;
+  });
 
   return (
     <div className="min-h-screen bg-[#181e24] text-white flex flex-col items-center py-12 px-4">
@@ -73,14 +77,14 @@ export default function LeaderboardPage() {
             {sorted.map((profile, i) => {
               const percentile = sorted.length > 1 ? 100 * (1 - i / (sorted.length - 1)) : 0;
               const rank = getRank(percentile);
-              const isMe = user && (profile as any).userId === user.id;
+              const isMe = user && (profile as unknown as { userId: string }).userId === user.id;
               return (
-                <tr key={(profile as any).userId} className={isMe ? 'bg-blue-900/40 font-bold' : 'bg-[#20262c]'}>
+                <tr key={(profile as unknown as { userId: string }).userId} className={isMe ? 'bg-blue-900/40 font-bold' : 'bg-[#20262c]'}>
                   <td className="py-2 px-3 rounded-l-xl">{i + 1}</td>
-                  <td className="py-2 px-3">{(profile as any).username}</td>
+                  <td className="py-2 px-3">{(profile as unknown as { username: string }).username}</td>
                   <td className="py-2 px-3">{rank}</td>
-                  <td className="py-2 px-3">{(profile as any).level}</td>
-                  <td className="py-2 px-3 rounded-r-xl">{(profile as any).xp}</td>
+                  <td className="py-2 px-3">{(profile as unknown as { level: number }).level}</td>
+                  <td className="py-2 px-3 rounded-r-xl">{(profile as unknown as { xp: number }).xp}</td>
                 </tr>
               );
             })}
