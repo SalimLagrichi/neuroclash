@@ -1,7 +1,7 @@
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { Bot, Users, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Bot, Users, ArrowLeft } from 'lucide-react';
 import '../app/globals.css';
 
 function GameSetupTile({ icon, title, description, onClick, colorClass }: {

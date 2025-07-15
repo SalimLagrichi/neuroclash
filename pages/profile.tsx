@@ -175,47 +175,6 @@ function getRank(percentile: number) {
   return 'Iron III'; // Worst possible
 }
 
-const eloRanks = [
-  { tier: 'Iron', sub: 'III', min: 0 },
-  { tier: 'Iron', sub: 'II', min: 2 },
-  { tier: 'Iron', sub: 'I', min: 6 },
-  { tier: 'Bronze', sub: 'III', min: 10 },
-  { tier: 'Bronze', sub: 'II', min: 14 },
-  { tier: 'Bronze', sub: 'I', min: 18 },
-  { tier: 'Silver', sub: 'III', min: 24 },
-  { tier: 'Silver', sub: 'II', min: 30 },
-  { tier: 'Silver', sub: 'I', min: 36 },
-  { tier: 'Gold', sub: 'III', min: 36 },
-  { tier: 'Gold', sub: 'II', min: 44 },
-  { tier: 'Gold', sub: 'I', min: 52 },
-  { tier: 'Platinum', sub: 'III', min: 60 },
-  { tier: 'Platinum', sub: 'II', min: 68 },
-  { tier: 'Platinum', sub: 'I', min: 76 },
-  { tier: 'Sapphire', sub: 'III', min: 84 },
-  { tier: 'Sapphire', sub: 'II', min: 88 },
-  { tier: 'Sapphire', sub: 'I', min: 92 },
-  { tier: 'Emerald', sub: 'III', min: 94 },
-  { tier: 'Emerald', sub: 'II', min: 95.5 },
-  { tier: 'Emerald', sub: 'I', min: 97 },
-  { tier: 'Ruby', sub: 'III', min: 98 },
-  { tier: 'Ruby', sub: 'II', min: 98.5 },
-  { tier: 'Ruby', sub: 'I', min: 99 },
-  { tier: 'Onyx', sub: 'III', min: 99.3 },
-  { tier: 'Onyx', sub: 'II', min: 99.7 },
-  { tier: 'Onyx', sub: 'I', min: 99.95 },
-  { tier: 'Diamond', sub: 'III', min: 99.7 },
-  { tier: 'Diamond', sub: 'II', min: 99.85 },
-  { tier: 'Diamond', sub: 'I', min: 99.95 },
-];
-function eloToRank(elo: number) {
-  for (let i = eloRanks.length - 1; i >= 0; i--) {
-    if (elo >= eloRanks[i].min) {
-      return `${eloRanks[i].tier} ${eloRanks[i].sub}`;
-    }
-  }
-  return 'Iron III';
-}
-
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
   const [username, setUsername] = useState('');

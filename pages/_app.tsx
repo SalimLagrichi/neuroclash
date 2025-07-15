@@ -3,9 +3,8 @@ import { useUser, UserButton } from '@clerk/nextjs';
 import type { AppProps } from 'next/app';
 import '../app/globals.css';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Swords } from 'lucide-react';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 function Navbar() {
   const { isSignedIn } = useUser();
@@ -16,11 +15,11 @@ function Navbar() {
         <span className="font-semibold text-xl tracking-wide text-white">Neuro Clash</span>
       </a>
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 text-base font-medium z-10 text-white">
-        <a href="/gamemodechoose" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Play</a>
+        <Link href="/gamemodechoose" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Play</Link>
         <a href="#features" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Features</a>
-        <a href="/leaderboard" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Leaderboard</a>
+        <Link href="/leaderboard" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Leaderboard</Link>
         <a href="#support" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Support</a>
-        <a href="/profile" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Profile</a>
+        <Link href="/profile" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Profile</Link>
       </div>
       <div className="z-10">
         {isSignedIn ? (

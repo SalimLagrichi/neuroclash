@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useUser, UserButton, SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { Swords, Globe, Trophy, BarChart, Clock, UserRound, Trophy as TrophyIcon, Bolt, Hand, Scale, Rocket } from "lucide-react";
 import '../app/globals.css';
 

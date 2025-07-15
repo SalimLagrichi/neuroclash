@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
-import { Clock, Trophy as TrophyIcon } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import React from 'react';
 import { useUser } from '@clerk/nextjs';
 import { wordBank } from '../../data/wordbank';
@@ -95,10 +95,6 @@ function generateWordSearch(words: string[], size: number): string[][] {
   return grid;
 }
 
-function arraysEqual(a: [number, number][], b: [number, number][]) {
-  return a.length === b.length && a.every((v, i) => v[0] === b[i][0] && v[1] === b[i][1]);
-}
-
 function getCpuMatchXp(result: 'win' | 'draw' | 'loss', difficulty: 'easy' | 'medium' | 'hard') {
   const xpTable = {
     win: { easy: 50, medium: 100, hard: 200 },
@@ -142,9 +138,6 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
   const [playerScore, setPlayerScore] = useState(0);
   const [cpuScore, setCpuScore] = useState(0);
   const [cpuWordsToFind, setCpuWordsToFind] = useState<string[]>([]);
-  const [cpuWordCount, setCpuWordCount] = useState(5);
-  const [cpuInterval, setCpuInterval] = useState(36);
-  const [cpuNextWordTime, setCpuNextWordTime] = useState(0);
   const [cpuWordIndex, setCpuWordIndex] = useState(0);
   const startTimeRef = useRef<number | null>(null);
   const { user } = useUser();
@@ -162,8 +155,6 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
     let interval = 36;
     if (difficulty === 'medium') { wordCount = 8; interval = 22; }
     if (difficulty === 'hard') { wordCount = 11; interval = 16; }
-    setCpuWordCount(wordCount);
-    setCpuInterval(interval);
     const availableWords = [...wordSet];
     const cpuWordsList: string[] = [];
     for (let i = 0; i < wordCount; i++) {
@@ -174,7 +165,6 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
     setCpuWordIndex(0);
     setCpuWords([]);
     setCpuScore(0);
-    setCpuNextWordTime(interval);
     startTimeRef.current = Date.now();
     setTimeLeft(180);
   }, [difficulty, wordSet]);
@@ -194,7 +184,7 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
       const elapsed = Math.floor((Date.now() - (startTimeRef.current || Date.now())) / 1000);
       if (
         cpuWordIndex < cpuWordsToFind.length &&
-        elapsed >= cpuInterval * (cpuWordIndex + 1)
+        elapsed >= ((difficulty === 'easy' ? 36 : difficulty === 'medium' ? 22 : 16) * (cpuWordIndex + 1))
       ) {
         const word = cpuWordsToFind[cpuWordIndex];
         // Only add if not already found
@@ -209,7 +199,7 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [cpuWordsToFind, cpuInterval, cpuWordIndex]);
+  }, [cpuWordsToFind, cpuWordIndex, difficulty]);
 
   // Drag logic
   function handleCellMouseDown(i: number, j: number) {

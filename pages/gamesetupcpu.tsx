@@ -1,7 +1,7 @@
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { Swords, Clock, UserRound, Trophy as TrophyIcon, Hand, Scale, Rocket, ArrowLeft, Bot } from "lucide-react";
+import { Swords, Clock, UserRound, Trophy as TrophyIcon, ArrowLeft, Bot } from "lucide-react";
 import '../app/globals.css';
 import React, { useRef } from 'react';
 import { wordBank } from '../data/wordbank';
@@ -99,7 +99,6 @@ function GameBoard({ difficulty, words }: { difficulty: 'easy' | 'medium' | 'har
   const [playerWords, setPlayerWords] = useState<string[]>([]);
   const [cpuWords, setCpuWords] = useState<string[]>([]);
   const [grid] = useState(() => generateGrid(words, GRID_SIZE));
-  const [selectedWord, setSelectedWord] = useState('');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // CPU logic: schedule word finds based on difficulty
@@ -128,7 +127,7 @@ function GameBoard({ difficulty, words }: { difficulty: 'easy' | 'medium' | 'har
       }
     }, 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [difficulty, words]);
+  }, [difficulty, words, timeLeft]);
 
   // Player click-to-select (MVP: just click a word in the list)
   function handleWordClick(word: string) {
