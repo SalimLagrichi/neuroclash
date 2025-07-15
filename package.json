@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "engines": {
+    "node": "20.11.1"
+  },
   "dependencies": {
     "@clerk/nextjs": "^6.24.0",
     "@supabase/supabase-js": "^2.50.4",
