@@ -181,7 +181,7 @@ export default function ProfilePage() {
   const [profileViews, setProfileViews] = useState<number | null>(null);
   const [xp, setXp] = useState(4200); // mock XP for now
   const [elo, setElo] = useState(1000); // real Elo if available
-  const [allProfiles, setAllProfiles] = useState<any[]>([]);
+  const [allProfiles, setAllProfiles] = useState<unknown[]>([]);
   const [activeTab, setActiveTab] = useState<'casual' | 'competitive'>('casual');
 
   useEffect(() => {
@@ -207,8 +207,12 @@ export default function ProfilePage() {
   // Calculate percentile and rank from Elo
   let myPercentile = 100;
   if (allProfiles.length > 1) {
-    const sorted = [...allProfiles].sort((a, b) => a.elo - b.elo);
-    const myIndex = sorted.findIndex(p => p.userId === user?.id);
+    const sorted = [...allProfiles].sort((a, b) => {
+      const profileA = a as { elo: number; userId: string };
+      const profileB = b as { elo: number; userId: string };
+      return profileA.elo - profileB.elo;
+    });
+    const myIndex = sorted.findIndex(p => (p as { userId: string }).userId === user?.id);
     if (myIndex !== -1) {
       myPercentile = 100 * (1 - myIndex / (sorted.length - 1));
     }

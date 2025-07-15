@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
-import { Swords, Globe, Trophy, BarChart, Clock, UserRound, Trophy as TrophyIcon, Bolt, Hand, Scale, Rocket } from "lucide-react";
+import { Swords, Globe, Trophy, BarChart } from "lucide-react";
 import '../app/globals.css';
 
 export default function Home() {

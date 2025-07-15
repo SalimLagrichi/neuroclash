@@ -90,8 +90,8 @@ function UsernameGate({ children }: { children: React.ReactNode }) {
       } else {
         setError(data.error || 'Unknown error');
       }
-    } catch (err: any) {
-      setError(err?.toString() || 'Unknown error');
+    } catch (err: unknown) {
+      setError((err as Error)?.message || 'Unknown error');
     }
     setSubmitting(false);
   };
