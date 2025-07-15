@@ -152,9 +152,8 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
   // Setup CPU word list and timing on mount/difficulty change
   useEffect(() => {
     let wordCount = 5;
-    let interval = 36;
-    if (difficulty === 'medium') { wordCount = 8; interval = 22; }
-    if (difficulty === 'hard') { wordCount = 11; interval = 16; }
+    if (difficulty === 'medium') { wordCount = 8; }
+    if (difficulty === 'hard') { wordCount = 11; }
     const availableWords = [...wordSet];
     const cpuWordsList: string[] = [];
     for (let i = 0; i < wordCount; i++) {
@@ -282,12 +281,6 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
           });
       });
   }, [gameOver, user, playerScore, cpuScore, difficulty]);
-
-  function handleWordClick(word: string) {
-    if (!playerWords.includes(word) && !cpuWords.includes(word)) {
-      setPlayerWords((prev) => [...prev, word]);
-    }
-  }
 
   return (
     <div className="w-full min-h-screen flex flex-col bg-[#181e24] text-white overflow-y-hidden" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>

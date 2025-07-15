@@ -6,10 +6,6 @@ import '../app/globals.css';
 import React, { useRef } from 'react';
 import { wordBank } from '../data/wordbank';
 
-interface GameSetupCpuCardProps {
-  user?: { imageUrl?: string; firstName?: string | null };
-}
-
 const cpuProfiles = {
   easy: {
     name: 'WordBot',

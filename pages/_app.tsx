@@ -10,10 +10,10 @@ function Navbar() {
   const { isSignedIn } = useUser();
   return (
     <nav className="w-full relative flex items-center px-[10%] py-6 min-h-[64px] bg-[#232a32] shadow text-white">
-      <a href="/" className="flex items-center gap-2 z-10 flex-1 cursor-pointer hover:opacity-80 transition text-white">
+      <Link href="/" className="flex items-center gap-2 z-10 flex-1 cursor-pointer hover:opacity-80 transition text-white">
         <Swords className="w-7 h-7 text-white" />
         <span className="font-semibold text-xl tracking-wide text-white">Neuro Clash</span>
-      </a>
+      </Link>
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 text-base font-medium z-10 text-white">
         <Link href="/gamemodechoose" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Play</Link>
         <a href="#features" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Features</a>

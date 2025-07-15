@@ -5,7 +5,7 @@ export default function TestProfile() {
   const [username, setUsername] = useState('');
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
-  const [response, setResponse] = useState<any>(null);
+  const [response, setResponse] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
 
   const handleGet = async () => {
