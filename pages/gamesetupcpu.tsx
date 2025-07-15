@@ -5,6 +5,7 @@ import { Swords, Clock, UserRound, Trophy as TrophyIcon, ArrowLeft, Bot } from "
 import '../app/globals.css';
 import React, { useRef } from 'react';
 import { wordBank } from '../data/wordbank';
+import Image from 'next/image';
 
 const cpuProfiles = {
   easy: {
@@ -253,7 +254,13 @@ export default function GameSetupCpuPage() {
               {/* Personalization */}
               <div className="flex flex-col items-center mb-4">
                 {user?.imageUrl && (
-                  <img src={user.imageUrl} alt="avatar" className="w-14 h-14 rounded-full mb-2 border-2 border-blue-400 shadow" />
+                  <Image
+                    src={user.imageUrl}
+                    alt="avatar"
+                    width={56}
+                    height={56}
+                    className="w-14 h-14 rounded-full mb-2 border-2 border-blue-400 shadow"
+                  />
                 )}
                 <span className="text-lg font-semibold text-white">Welcome{user?.firstName ? `, ${user.firstName}` : ''}!</span>
               </div>

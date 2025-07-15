@@ -1,6 +1,7 @@
 import { useUser } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import { Medal, Brain, Search, Calculator, Grid, Puzzle, Crown } from 'lucide-react';
+import Image from 'next/image';
 
 const mockProfile = {
   elo: 1240, // mock Elo value
@@ -228,7 +229,19 @@ export default function ProfilePage() {
         style={{ minWidth: '320px' }}>
         {/* Profile header */}
         <div className="flex items-center gap-8">
-          <img src={user?.imageUrl} alt="Profile" className="w-24 h-24 rounded-full border-4 border-blue-500 shadow" />
+          {user?.imageUrl ? (
+            <Image
+              src={user.imageUrl}
+              alt="Profile"
+              width={96}
+              height={96}
+              className="w-24 h-24 rounded-full border-4 border-blue-500 shadow"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full border-4 border-blue-500 shadow bg-gray-700 flex items-center justify-center text-3xl text-white">
+              ?
+            </div>
+          )}
           <div>
             <h1 className="text-3xl font-bold mb-1">{username}</h1>
             <div className="text-blue-200 text-sm font-medium mt-1">{profileViews ?? 0} profile views</div>
@@ -307,7 +320,7 @@ export default function ProfilePage() {
           <div className="w-full bg-[#20262c] rounded-xl p-6 shadow border border-gray-700/40 min-h-[100px]">
             <h2 className="text-2xl font-bold mb-4 text-white">Game Modes</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {(activeTab === 'casual' ? mockProfile.gameModesCasual : mockProfile.gameModesCompetitive).map((mode, i) => {
+              {(activeTab === 'casual' ? mockProfile.gameModesCasual : mockProfile.gameModesCompetitive).map((mode) => {
                 const Icon = gameModeIcons[mode.name] || Brain;
                 return (
                   <div key={mode.name} className="bg-[#20262c] rounded-xl p-6 flex flex-col items-center shadow border border-gray-600/40 min-h-[320px] w-full">

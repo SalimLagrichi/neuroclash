@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '../../lib/supabaseClients';
 
 // Utility to generate a random word grid and word list (replace with your actual logic)
-function generateGameGridAndWords(difficulty: string) {
+function generateGameGridAndWords() {
   // For now, just mock a 12x12 grid and 12 words
   const words = [
     'APPLE', 'BANANA', 'ORANGE', 'GRAPE', 'PEACH', 'MANGO',
@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let grid = game.grid;
     let words = game.words;
     if (!grid || !words) {
-      const generated = generateGameGridAndWords(difficulty);
+      const generated = generateGameGridAndWords();
       grid = generated.grid;
       words = generated.words;
     }
@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ game: updated });
   } else {
     // 3. No waiting game, create a new one
-    const { grid, words } = generateGameGridAndWords(difficulty);
+    const { grid, words } = generateGameGridAndWords();
     const { data: created, error: createError } = await supabase
       .from('games')
       .insert([

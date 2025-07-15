@@ -4,6 +4,7 @@ import { Clock } from 'lucide-react';
 import React from 'react';
 import { useUser } from '@clerk/nextjs';
 import { wordBank } from '../../data/wordbank';
+import Image from 'next/image';
 
 function getRandomWordSet() {
   // Flatten all sets in wordBank.mixed
@@ -157,8 +158,7 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
     const availableWords = [...wordSet];
     const cpuWordsList: string[] = [];
     for (let i = 0; i < wordCount; i++) {
-      const idx = Math.floor(Math.random() * availableWords.length);
-      cpuWordsList.push(availableWords.splice(idx, 1)[0]);
+      cpuWordsList.push(availableWords.splice(Math.floor(Math.random() * availableWords.length), 1)[0]);
     }
     setCpuWordsToFind(cpuWordsList);
     setCpuWordIndex(0);
@@ -262,7 +262,6 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
       .then(res => res.json())
       .then(profile => {
         const oldXp = profile.xp ?? 0;
-        const oldLevel = getLevelInfo(oldXp).level;
         fetch('/api/profile/add-xp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -296,6 +295,7 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
         {/* Horizontal Words to Find Bar - 2 rows of 6 words */}
         <div className="bg-[#232a32] rounded-xl py-3 px-6 shadow-lg mb-4 mx-auto max-w-fit">
           <div className="grid grid-cols-6 grid-rows-2 gap-2">
+            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
             {wordSet.map((word, idx) => {
               const foundByPlayer = playerWords.includes(word);
               const foundByCPU = cpuWords.includes(word);
@@ -327,7 +327,13 @@ function GameBoard({ difficulty }: { difficulty: 'easy' | 'medium' | 'hard' }) {
         {/* Player Panel */}
         <div className="bg-[#232a32] rounded-2xl p-6 w-full md:w-64 flex flex-col items-center shadow-lg">
           {user?.imageUrl ? (
-            <img src={user.imageUrl} alt="avatar" className="w-14 h-14 rounded-full mb-2 border-2 border-blue-400 shadow" />
+            <Image
+              src={user.imageUrl}
+              alt="avatar"
+              width={56}
+              height={56}
+              className="w-14 h-14 rounded-full mb-2 border-2 border-blue-400 shadow"
+            />
           ) : (
             <span className="text-3xl mb-2">🎮</span>
           )}

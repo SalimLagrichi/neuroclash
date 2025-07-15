@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { Swords, Clock, UserRound, Trophy as TrophyIcon, ArrowLeft, Settings, Handshake, Medal } from "lucide-react";
 import '../app/globals.css';
+import Image from 'next/image';
 
 function GameSetupOnlineCard({ user, onFindMatch, loading, waiting }: { user?: { imageUrl?: string; firstName?: string | null }; onFindMatch: () => void; loading: boolean; waiting: boolean }) {
   return (
@@ -10,7 +11,13 @@ function GameSetupOnlineCard({ user, onFindMatch, loading, waiting }: { user?: {
       {/* Personalization */}
       <div className="flex flex-col items-center mb-4">
         {user?.imageUrl && (
-          <img src={user.imageUrl} alt="avatar" className="w-14 h-14 rounded-full mb-2 border-2 border-blue-400 shadow" />
+          <Image
+            src={user.imageUrl}
+            alt="avatar"
+            width={56}
+            height={56}
+            className="w-14 h-14 rounded-full mb-2 border-2 border-blue-400 shadow"
+          />
         )}
         <span className="text-lg font-semibold text-white">Welcome{user?.firstName ? `, ${user.firstName}` : ''}!</span>
       </div>
@@ -84,6 +91,7 @@ export default function GameSetupOnlinePage() {
           clearInterval(interval);
           router.push(`/play/online/${gameId}`);
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         setError('Error checking game status.');
       }
@@ -117,6 +125,7 @@ export default function GameSetupOnlinePage() {
       } else {
         setError('Failed to find or create a match.');
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       setError('Error connecting to matchmaking.');
     }
