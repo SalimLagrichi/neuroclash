@@ -1,17 +1,96 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '../../lib/supabaseClients';
+import { wordBank } from '../../data/wordbank';
 
-// Utility to generate a random word grid and word list (replace with your actual logic)
+// Utility to generate a random word grid and word list (now embeds words in the grid and only returns placed words)
 function generateGameGridAndWords() {
-  // For now, just mock a 12x12 grid and 12 words
-  const words = [
-    'APPLE', 'BANANA', 'ORANGE', 'GRAPE', 'PEACH', 'MANGO',
-    'BERRY', 'PLUM', 'LEMON', 'LIME', 'PEAR', 'KIWI',
+  const size = 12;
+  // Flatten all words from all sets in wordBank.mixed
+  const allWords = Array.from(new Set(wordBank.mixed.flat().map(w => w.toUpperCase())));
+  // Randomly select 12 unique words
+  function getRandomWords(arr: string[], n: number) {
+    const result = [];
+    const used = new Set();
+    while (result.length < n && used.size < arr.length) {
+      const idx = Math.floor(Math.random() * arr.length);
+      if (!used.has(idx)) {
+        result.push(arr[idx]);
+        used.add(idx);
+      }
+    }
+    return result;
+  }
+  const selectedWords = getRandomWords(allWords, 12);
+  // Initialize empty grid
+  const grid: string[][] = Array.from({ length: size }, () => Array(size).fill(''));
+  const directions = [
+    [0, 1],   // right
+    [1, 0],   // down
+    [1, 1],   // down-right
+    [-1, 1],  // up-right
+    [0, -1],  // left
+    [-1, 0],  // up
+    [1, -1],  // down-left
+    [-1, -1], // up-left
   ];
-  const grid = Array.from({ length: 12 }, () =>
-    Array.from({ length: 12 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26)))
-  );
-  return { grid, words };
+  function canPlace(word: string, x: number, y: number, dx: number, dy: number) {
+    for (let i = 0; i < word.length; i++) {
+      const nx = x + dx * i;
+      const ny = y + dy * i;
+      if (nx < 0 || ny < 0 || nx >= size || ny >= size) return false;
+      if (grid[nx][ny] && grid[nx][ny] !== word[i]) return false;
+    }
+    return true;
+  }
+  function placeWord(word: string) {
+    // Try each direction systematically
+    for (const [dx, dy] of directions) {
+      // Try multiple starting positions for each direction
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const x = Math.floor(Math.random() * size);
+        const y = Math.floor(Math.random() * size);
+        if (canPlace(word, x, y, dx, dy)) {
+          for (let i = 0; i < word.length; i++) {
+            grid[x + dx * i][y + dy * i] = word[i];
+          }
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  const placedWords: string[] = [];
+  selectedWords.forEach(word => {
+    if (placeWord(word)) {
+      placedWords.push(word);
+    } else {
+      console.log(`Failed to place word: ${word}`);
+    }
+  });
+
+  // If we couldn't place all words, try with shorter words or different placement strategy
+  if (placedWords.length < 12) {
+    console.log(`Only placed ${placedWords.length}/12 words. Trying to place remaining words...`);
+    const remainingWords = selectedWords.filter(w => !placedWords.includes(w));
+    for (const word of remainingWords) {
+      if (placeWord(word)) {
+        placedWords.push(word);
+      }
+    }
+  }
+
+  console.log(`Successfully placed ${placedWords.length}/12 words:`, placedWords);
+
+  // Fill empty cells with random letters
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (!grid[i][j]) {
+        grid[i][j] = alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+    }
+  }
+  return { grid, words: placedWords };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
