@@ -69,6 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           grid,
           words,
           difficulty,
+          game_type: 'multiplayer',
         },
       ])
       .select()
