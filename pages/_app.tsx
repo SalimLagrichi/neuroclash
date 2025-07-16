@@ -9,17 +9,24 @@ import Link from 'next/link';
 function Navbar() {
   const { isSignedIn } = useUser();
   return (
-    <nav className="w-full relative flex items-center px-[10%] py-6 min-h-[64px] bg-[#232a32] shadow text-white">
+    <nav
+      className="w-full relative flex items-center px-[10%] py-6 min-h-[64px] bg-[#16202A] shadow text-white border-b-2 border-white/10"
+      style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='20' height='20' fill='black' fill-opacity='0.25'/><circle cx='2' cy='2' r='0.5' fill='black' fill-opacity='0.1'/><circle cx='10' cy='5' r='0.5' fill='black' fill-opacity='0.1'/><circle cx='15' cy='15' r='0.5' fill='black' fill-opacity='0.1'/><circle cx='7' cy='13' r='0.5' fill='black' fill-opacity='0.1'/><circle cx='18' cy='8' r='0.5' fill='black' fill-opacity='0.1'/></svg>')`, backgroundBlendMode: 'overlay', boxShadow: '0 4px 16px 0 rgba(0,0,0,0.25)' }}
+    >
       <Link href="/" className="flex items-center gap-2 z-10 flex-1 cursor-pointer hover:opacity-80 transition text-white">
         <Swords className="w-7 h-7 text-white" />
         <span className="font-semibold text-xl tracking-wide text-white">Neuro Clash</span>
       </Link>
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 text-base font-medium z-10 text-white">
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 text-lg font-medium z-10 text-white">
         <Link href="/gamemodechoose" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Play</Link>
-        <a href="#features" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Features</a>
+        <div className="w-px h-4 bg-white/30"></div>
+        <a href="#social" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Social</a>
+        <div className="w-px h-4 bg-white/30"></div>
         <Link href="/leaderboard" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Leaderboard</Link>
-        <a href="#support" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Support</a>
+        <div className="w-px h-4 bg-white/30"></div>
         <Link href="/profile" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Profile</Link>
+        <div className="w-px h-4 bg-white/30"></div>
+        <a href="#support" className="hover:text-blue-400 transition cursor-pointer inline-block pointer-events-auto text-white">Support</a>
       </div>
       <div className="z-10">
         {isSignedIn ? (
