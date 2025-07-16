@@ -2,10 +2,27 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import supabase from '../../../lib/supabaseClients';
 
+interface Game {
+  id: string;
+  player1_id: string;
+  player2_id: string;
+  status: string;
+  grid: string[][];
+  words: string[];
+  player1_score: number;
+  player2_score: number;
+  started_at: string | null;
+  ended_at: string | null;
+  difficulty: string;
+  winner_id: string | null;
+  game_type: string;
+  // Add any other fields you have in your table
+}
+
 export default function OnlineGamePage() {
   const router = useRouter();
   const { id } = router.query;
-  const [game, setGame] = useState<any>(null);
+  const [game, setGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Fetch game state on mount
@@ -21,7 +38,7 @@ export default function OnlineGamePage() {
         if (error) {
           // handle error
         } else {
-          setGame(data);
+          setGame(data as Game);
         }
         setLoading(false);
       });
@@ -36,7 +53,7 @@ export default function OnlineGamePage() {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${id}` },
         (payload) => {
-          setGame(payload.new);
+          setGame(payload.new as Game);
         }
       )
       .subscribe();
