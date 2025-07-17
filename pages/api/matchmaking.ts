@@ -131,6 +131,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       grid = generated.grid;
       words = generated.words;
     }
+    // Randomly assign colors if not already set
+    let player1_color = game.player1_color;
+    let player2_color = game.player2_color;
+    if (!player1_color || !player2_color) {
+      if (Math.random() < 0.5) {
+        player1_color = 'blue';
+        player2_color = 'red';
+      } else {
+        player1_color = 'red';
+        player2_color = 'blue';
+      }
+    }
     const { data: updated, error: updateError } = await supabase
       .from('games')
       .update({
@@ -139,6 +151,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         grid,
         words,
         started_at: new Date().toISOString(),
+        player1_color,
+        player2_color,
       })
       .eq('id', game.id)
       .select()
@@ -148,6 +162,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } else {
     // 3. No waiting game, create a new one
     const { grid, words } = generateGameGridAndWords();
+    // Randomly assign colors
+    let player1_color = 'blue';
+    let player2_color = 'red';
+    if (Math.random() < 0.5) {
+      player1_color = 'red';
+      player2_color = 'blue';
+    }
     const { data: created, error: createError } = await supabase
       .from('games')
       .insert([
@@ -158,6 +179,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           words,
           difficulty,
           game_type: 'multiplayer',
+          player1_color,
+          player2_color,
         },
       ])
       .select()

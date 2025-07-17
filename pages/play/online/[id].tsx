@@ -21,6 +21,8 @@ interface Game {
   difficulty: string;
   winner_id: string | null;
   game_type: string;
+  player1_color: string;
+  player2_color: string;
 }
 
 export default function OnlineGamePage() {
@@ -242,22 +244,37 @@ export default function OnlineGamePage() {
   function handleMouseUp() {
     if (!selecting || !game) return;
     const word = getSelectedWord();
+    const youId = user?.id || game.player1_id;
+    const isPlayer1 = youId === game.player1_id;
+    const wordsFoundKey = isPlayer1 ? 'player1_words_found' : 'player2_words_found';
+    const scoreKey = isPlayer1 ? 'player1_score' : 'player2_score';
     if (
       word.length >= 3 &&
       game.words.includes(word) &&
       !game.player1_words_found.includes(word) &&
       !game.player2_words_found.includes(word)
     ) {
-      // Remove optimistic local update: setGame({...})
-      // Only update Supabase with the found word for player1
+      // Debug logging
+      console.log('Attempting to update:', {
+        [wordsFoundKey]: [...game[wordsFoundKey], word],
+        [scoreKey]: game[scoreKey] + word.length,
+        id: game.id
+      });
+      // Update Supabase with error handling
       supabase
         .from('games')
         .update({
-          player1_words_found: [...game.player1_words_found, word],
-          player1_score: game.player1_score + word.length,
+          [wordsFoundKey]: [...game[wordsFoundKey], word],
+          [scoreKey]: game[scoreKey] + word.length,
         })
         .eq('id', game.id)
-        .select();
+        .select()
+        .then(({ error }) => {
+          if (error) {
+            console.error('Supabase update error:', error);
+            alert('Error updating game: ' + error.message);
+          }
+        });
     }
     setSelecting(false);
     setSelectedCells([]);
@@ -272,12 +289,12 @@ export default function OnlineGamePage() {
     for (const word of game.words) {
       const path = findWordPath(game.grid, word);
       if (path) {
-        const foundByPlayer = game.player1_words_found.includes(word);
-        const foundByOpponent = game.player2_words_found.includes(word);
+        const foundByPlayer1 = game.player1_words_found.includes(word);
+        const foundByPlayer2 = game.player2_words_found.includes(word);
         let color: 'blue' | 'red' | 'green' | null = null;
-        if (foundByPlayer && foundByOpponent) color = 'green';
-        else if (foundByPlayer) color = 'blue';
-        else if (foundByOpponent) color = 'red';
+        if (foundByPlayer1 && foundByPlayer2) color = 'green';
+        else if (foundByPlayer1) color = game.player1_color === 'red' ? 'red' : 'blue';
+        else if (foundByPlayer2) color = game.player2_color === 'red' ? 'red' : 'blue';
         if (color) {
           for (const [i, j] of path) {
             cellHighlights[`${i}-${j}`] = color;
@@ -374,12 +391,12 @@ export default function OnlineGamePage() {
             <div className="bg-[#232a32] rounded-xl py-3 px-6 shadow-lg mx-auto max-w-4xl w-full">
               <div className="grid grid-cols-3 md:grid-cols-6 grid-rows-4 md:grid-rows-2 gap-2 w-full">
                 {game.words.map((word) => {
-                  const foundByPlayer = game.player1_words_found.includes(word);
-                  const foundByOpponent = game.player2_words_found.includes(word);
+                  const foundByPlayer1 = game.player1_words_found.includes(word);
+                  const foundByPlayer2 = game.player2_words_found.includes(word);
                   let color = '';
-                  if (foundByPlayer && foundByOpponent) color = 'bg-green-600 text-white';
-                  else if (foundByPlayer) color = 'bg-blue-600 text-white';
-                  else if (foundByOpponent) color = 'bg-red-500 text-white';
+                  if (foundByPlayer1 && foundByPlayer2) color = 'bg-green-600 text-white';
+                  else if (foundByPlayer1) color = game.player1_color === 'red' ? 'bg-red-500 text-white' : 'bg-blue-600 text-white';
+                  else if (foundByPlayer2) color = game.player2_color === 'red' ? 'bg-red-500 text-white' : 'bg-blue-600 text-white';
                   else color = 'bg-[#181e24] text-gray-200';
                   return (
                     <span
@@ -422,12 +439,12 @@ export default function OnlineGamePage() {
       <div className="flex flex-col md:flex-row justify-center items-start gap-8 px-2 py-8 max-w-6xl w-full mx-auto">
         {/* Player Panel - Hidden on mobile, visible on desktop */}
         <div className="hidden md:flex bg-[#232a32] rounded-2xl p-6 w-64 flex-col items-center shadow-lg">
-          <div className="w-16 h-16 rounded-full bg-[#181e24] flex items-center justify-center mb-2 text-4xl">🎮</div>
+          <div className={`w-16 h-16 rounded-full bg-[#181e24] flex items-center justify-center mb-2 text-4xl ${game.player1_color === 'red' ? 'text-red-500' : 'text-blue-400'}`}>🎮</div>
           <span className="font-bold text-lg mb-1">{usernames?.you || 'You'}</span>
-          <span className="text-blue-400 text-3xl font-mono mb-4">{game.player1_score}</span>
+          <span className={`${game.player1_color === 'red' ? 'text-red-500' : 'text-blue-400'} text-3xl font-mono mb-4`}>{game.player1_score}</span>
           <div className="flex flex-col gap-1 w-full mt-2">
             {game.player1_words_found.map((w) => (
-              <div key={w} className="bg-blue-600 text-white rounded px-1 py-1 text-center text-xs font-bold whitespace-nowrap overflow-hidden text-ellipsis">{w}</div>
+              <div key={w} className={`${game.player1_color === 'red' ? 'bg-red-500' : 'bg-blue-600'} text-white rounded px-1 py-1 text-center text-xs font-bold whitespace-nowrap overflow-hidden text-ellipsis`}>{w}</div>
             ))}
           </div>
         </div>
@@ -489,12 +506,12 @@ export default function OnlineGamePage() {
 
         {/* Opponent Panel - Hidden on mobile, visible on desktop */}
         <div className="hidden md:flex bg-[#232a32] rounded-2xl p-6 w-64 flex-col items-center shadow-lg">
-          <div className="w-16 h-16 rounded-full bg-[#181e24] flex items-center justify-center mb-2 text-4xl">👤</div>
+          <div className={`w-16 h-16 rounded-full bg-[#181e24] flex items-center justify-center mb-2 text-4xl ${game.player2_color === 'red' ? 'text-red-500' : 'text-blue-400'}`}>👤</div>
           <span className="font-bold text-lg mb-1">{usernames?.opponent || 'Opponent'}</span>
-          <span className="text-pink-400 text-3xl font-mono mb-4">{game.player2_score}</span>
+          <span className={`${game.player2_color === 'red' ? 'text-red-500' : 'text-blue-400'} text-3xl font-mono mb-4`}>{game.player2_score}</span>
           <div className="flex flex-col gap-1 w-full mt-2">
             {game.player2_words_found.map((w) => (
-              <div key={w} className="bg-red-500 text-white rounded px-1 py-1 text-center text-xs font-bold whitespace-nowrap overflow-hidden text-ellipsis">{w}</div>
+              <div key={w} className={`${game.player2_color === 'red' ? 'bg-red-500' : 'bg-blue-600'} text-white rounded px-1 py-1 text-center text-xs font-bold whitespace-nowrap overflow-hidden text-ellipsis`}>{w}</div>
             ))}
           </div>
         </div>
