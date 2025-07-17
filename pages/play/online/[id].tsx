@@ -254,6 +254,7 @@ export default function OnlineGamePage() {
     const wordsFoundKey = isPlayer1 ? 'player1_words_found' : 'player2_words_found';
     const scoreKey = isPlayer1 ? 'player1_score' : 'player2_score';
     const foundWords = game[wordsFoundKey] as string[];
+    // Only check the current player's found words for blocking
     if (
       word.length >= 3 &&
       game.words.includes(word) &&
