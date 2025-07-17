@@ -260,6 +260,12 @@ export default function OnlineGamePage() {
       game.words.includes(word) &&
       !foundWords.includes(word)
     ) {
+      // Optimistically update local state for instant feedback
+      setGame({
+        ...game,
+        [wordsFoundKey]: [...foundWords, word],
+        [scoreKey]: game[scoreKey] + word.length,
+      });
       // Debug logging
       console.log('Attempting to update:', {
         [wordsFoundKey]: [...foundWords, word],
@@ -393,14 +399,16 @@ export default function OnlineGamePage() {
             <div className="bg-[#232a32] rounded-xl py-3 px-6 shadow-lg mx-auto max-w-4xl w-full">
               <div className="grid grid-cols-3 md:grid-cols-6 grid-rows-4 md:grid-rows-2 gap-2 w-full">
                 {game.words.map((word) => {
-                  // Only show color for the current player's found words
+                  const foundByPlayer1 = game.player1_words_found.includes(word);
+                  const foundByPlayer2 = game.player2_words_found.includes(word);
                   const youId = user?.id || game.player1_id;
                   const isPlayer1 = youId === game.player1_id;
                   const foundByYou = isPlayer1
-                    ? game.player1_words_found.includes(word)
-                    : game.player2_words_found.includes(word);
+                    ? foundByPlayer1
+                    : foundByPlayer2;
                   let color = '';
-                  if (foundByYou) color = (isPlayer1 ? game.player1_color : game.player2_color) === 'red' ? 'bg-red-500 text-white' : 'bg-blue-600 text-white';
+                  if (foundByPlayer1 && foundByPlayer2) color = 'bg-green-600 text-white';
+                  else if (foundByYou) color = (isPlayer1 ? game.player1_color : game.player2_color) === 'red' ? 'bg-red-500 text-white' : 'bg-blue-600 text-white';
                   else color = 'bg-[#181e24] text-gray-200';
                   return (
                     <span
