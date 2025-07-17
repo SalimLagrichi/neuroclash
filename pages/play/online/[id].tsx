@@ -248,13 +248,8 @@ export default function OnlineGamePage() {
       !game.player1_words_found.includes(word) &&
       !game.player2_words_found.includes(word)
     ) {
-      // Optimistically update local state
-      setGame({
-        ...game,
-        player1_words_found: [...game.player1_words_found, word],
-        player1_score: game.player1_score + word.length,
-      });
-      // Update Supabase with the found word for player1
+      // Remove optimistic local update: setGame({...})
+      // Only update Supabase with the found word for player1
       supabase
         .from('games')
         .update({
