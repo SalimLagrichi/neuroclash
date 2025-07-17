@@ -187,14 +187,33 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isLoaded || !user) return;
+
+    // Fetch profile, create if it doesn't exist
     fetch(`/api/profile?userId=${user.id}`)
-      .then(res => res.json())
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          // Profile doesn't exist, create it
+          return fetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              username: user.username || user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'Player',
+              xp: 0,
+              level: 1,
+            }),
+          }).then(createRes => createRes.json());
+        }
+      })
       .then(data => {
         setUsername(data.username || '');
         setProfileViews(data.profileViews ?? 0);
         setXp(data.xp ?? 0);
         setElo(data.elo ?? 1000);
       });
+
     fetch('/api/profile/all')
       .then(res => res.json())
       .then(data => setAllProfiles(data.profiles || []));

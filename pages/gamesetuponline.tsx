@@ -107,7 +107,11 @@ export default function GameSetupOnlinePage() {
       const res = await fetch('/api/matchmaking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, difficulty: 'medium' }),
+        body: JSON.stringify({
+          userId: user.id,
+          difficulty: 'medium',
+          username: user.username || user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'Player'
+        }),
       });
       if (!res.ok) {
         setError('Failed to find or create a match.');

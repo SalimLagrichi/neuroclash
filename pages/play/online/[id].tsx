@@ -86,9 +86,12 @@ export default function OnlineGamePage() {
 
   // Game over detection
   const gameOver =
-    !!game && (timeLeft <= 0 ||
+    !!game && (
+      timeLeft <= 0 ||
       game.player1_words_found.length >= game.words.length ||
-      game.player2_words_found.length >= game.words.length);
+      game.player2_words_found.length >= game.words.length ||
+      game.status === 'ended'
+    );
 
   // Fetch usernames for both players
   useEffect(() => {
@@ -97,12 +100,41 @@ export default function OnlineGamePage() {
       if (!game) return; // Additional null check
       const youId = user?.id || game.player1_id;
       const oppId = youId === game.player1_id ? game.player2_id : game.player1_id;
-      const [youRes, oppRes] = await Promise.all([
-        fetch(`/api/profile?userId=${youId}`),
-        oppId ? fetch(`/api/profile?userId=${oppId}`) : Promise.resolve(null),
-      ]);
-      const youData = youRes.ok ? await youRes.json() : {};
-      const oppData = oppRes && oppRes.ok ? await oppRes.json() : {};
+
+      // Fetch your profile
+      const youRes = await fetch(`/api/profile?userId=${youId}`);
+      type UserProfile = { userId: string; username: string; xp: number; level: number };
+      let youData: UserProfile = youRes.ok ? await youRes.json() : { userId: '', username: '', xp: 0, level: 1 };
+
+      // If your profile doesn't exist, create it
+      if (!youRes.ok && user) {
+        const createRes = await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            username: user.username || user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'Player',
+            xp: 0,
+            level: 1,
+          }),
+        });
+        if (createRes.ok) {
+          youData = await createRes.json();
+        }
+      }
+
+      // Fetch opponent's profile
+      let oppData: UserProfile = { userId: '', username: '', xp: 0, level: 1 };
+      if (oppId) {
+        const oppRes = await fetch(`/api/profile?userId=${oppId}`);
+        if (oppRes.ok) {
+          oppData = await oppRes.json();
+        } else {
+          // If opponent profile doesn't exist, we can't create it without their user data
+          console.log('Opponent profile not found for ID:', oppId);
+        }
+      }
+
       setUsernames({ you: youData.username || 'You', opponent: oppData.username || 'Opponent' });
     }
     fetchNames();
@@ -157,7 +189,14 @@ export default function OnlineGamePage() {
   function findWordPath(grid: string[][], word: string) {
     const size = grid.length;
     const directions = [
-      [0, 1], [1, 0], [1, 1], [-1, 1]
+      [0, 1],    // right
+      [1, 0],    // down
+      [1, 1],    // down-right
+      [1, -1],   // down-left
+      [0, -1],   // left
+      [-1, 0],   // up
+      [-1, -1],  // up-left
+      [-1, 1],   // up-right
     ];
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
@@ -338,7 +377,7 @@ export default function OnlineGamePage() {
           {/* Words to Find Bar */}
           <div className="mb-8 w-full flex justify-center">
             <div className="bg-[#232a32] rounded-xl py-3 px-6 shadow-lg mx-auto max-w-4xl w-full">
-              <div className="grid grid-cols-6 grid-rows-2 gap-2 w-full">
+              <div className="grid grid-cols-3 md:grid-cols-6 grid-rows-4 md:grid-rows-2 gap-2 w-full">
                 {game.words.map((word) => {
                   const foundByPlayer = game.player1_words_found.includes(word);
                   const foundByOpponent = game.player2_words_found.includes(word);
@@ -350,7 +389,7 @@ export default function OnlineGamePage() {
                   return (
                     <span
                       key={word}
-                      className={`px-4 py-2 rounded-lg text-base font-mono font-bold text-center transition border border-[#232a32] shadow-sm select-none ${color}`}
+                      className={`px-2 md:px-4 py-1 md:py-2 rounded-lg text-sm md:text-base font-mono font-bold text-center transition border border-[#232a32] shadow-sm select-none ${color}`}
                     >
                       {word}
                     </span>
@@ -361,12 +400,35 @@ export default function OnlineGamePage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Score Bar - Only visible on mobile */}
+      <div className="md:hidden w-full px-4 mb-4">
+        <div className="bg-[#232a32] rounded-xl p-4 shadow-lg">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-[#181e24] flex items-center justify-center text-2xl">🎮</div>
+              <div className="flex flex-col">
+                <span className="font-bold text-white">{usernames?.you || 'You'}</span>
+                <span className="text-blue-400 text-2xl font-mono">{game.player1_score}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end">
+                <span className="font-bold text-white">{usernames?.opponent || 'Opponent'}</span>
+                <span className="text-pink-400 text-2xl font-mono">{game.player2_score}</span>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-[#181e24] flex items-center justify-center text-2xl">👤</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Game Area */}
-      <div className="flex flex-row justify-center items-start gap-8 px-2 py-8 max-w-6xl w-full mx-auto">
-        {/* Player Panel */}
-        <div className="bg-[#232a32] rounded-2xl p-6 w-64 flex flex-col items-center shadow-lg">
+      <div className="flex flex-col md:flex-row justify-center items-start gap-8 px-2 py-8 max-w-6xl w-full mx-auto">
+        {/* Player Panel - Hidden on mobile, visible on desktop */}
+        <div className="hidden md:flex bg-[#232a32] rounded-2xl p-6 w-64 flex-col items-center shadow-lg">
           <div className="w-16 h-16 rounded-full bg-[#181e24] flex items-center justify-center mb-2 text-4xl">🎮</div>
-          <span className="font-bold text-lg mb-1">You</span>
+          <span className="font-bold text-lg mb-1">{usernames?.you || 'You'}</span>
           <span className="text-blue-400 text-3xl font-mono mb-4">{game.player1_score}</span>
           <div className="flex flex-col gap-1 w-full mt-2">
             {game.player1_words_found.map((w) => (
@@ -374,9 +436,10 @@ export default function OnlineGamePage() {
             ))}
           </div>
         </div>
+
         {/* Grid */}
         <div
-          className="bg-[#232a32] rounded-2xl p-6 flex flex-col items-center shadow-lg w-full max-w-xl"
+          className="bg-[#232a32] rounded-2xl p-4 md:p-6 flex flex-col items-center shadow-lg w-full max-w-xl mx-auto"
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onTouchEnd={handleMouseUp}
@@ -400,7 +463,7 @@ export default function OnlineGamePage() {
                   return (
                     <div
                       key={i + '-' + j}
-                      className={`w-8 h-8 flex items-center justify-center rounded text-lg font-mono border border-[#2d3640] select-none cursor-pointer ${cellColor}`}
+                      className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded text-sm md:text-lg font-mono border border-[#2d3640] select-none cursor-pointer ${cellColor}`}
                       onMouseDown={() => handleCellMouseDown(i, j)}
                       onMouseEnter={() => handleCellMouseEnter(i, j)}
                       onTouchStart={(e) => {
@@ -428,10 +491,11 @@ export default function OnlineGamePage() {
           </div>
           <div className="text-xs text-gray-400">Drag to select words • Minimum 3 letters</div>
         </div>
-        {/* Opponent Panel */}
-        <div className="bg-[#232a32] rounded-2xl p-6 w-64 flex flex-col items-center shadow-lg">
+
+        {/* Opponent Panel - Hidden on mobile, visible on desktop */}
+        <div className="hidden md:flex bg-[#232a32] rounded-2xl p-6 w-64 flex-col items-center shadow-lg">
           <div className="w-16 h-16 rounded-full bg-[#181e24] flex items-center justify-center mb-2 text-4xl">👤</div>
-          <span className="font-bold text-lg mb-1">Opponent</span>
+          <span className="font-bold text-lg mb-1">{usernames?.opponent || 'Opponent'}</span>
           <span className="text-pink-400 text-3xl font-mono mb-4">{game.player2_score}</span>
           <div className="flex flex-col gap-1 w-full mt-2">
             {game.player2_words_found.map((w) => (
@@ -440,6 +504,8 @@ export default function OnlineGamePage() {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 } 

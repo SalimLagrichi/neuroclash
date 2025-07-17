@@ -2,6 +2,16 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '../../lib/supabaseClients';
 import { wordBank } from '../../data/wordbank';
 
+// Utility to shuffle an array
+function shuffle<T>(array: T[]): T[] {
+  const arr = array.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 // Utility to generate a random word grid and word list (now embeds words in the grid and only returns placed words)
 function generateGameGridAndWords() {
   const size = 12;
@@ -23,15 +33,15 @@ function generateGameGridAndWords() {
   const selectedWords = getRandomWords(allWords, 12);
   // Initialize empty grid
   const grid: string[][] = Array.from({ length: size }, () => Array(size).fill(''));
-  const directions = [
-    [0, 1],   // right
-    [1, 0],   // down
-    [1, 1],   // down-right
-    [-1, 1],  // up-right
-    [0, -1],  // left
-    [-1, 0],  // up
-    [1, -1],  // down-left
-    [-1, -1], // up-left
+  const DIRECTIONS = [
+    [0, 1],    // right
+    [1, 0],    // down
+    [1, 1],    // down-right
+    [1, -1],   // down-left
+    [0, -1],   // left
+    [-1, 0],   // up
+    [-1, -1],  // up-left
+    [-1, 1],   // up-right
   ];
   function canPlace(word: string, x: number, y: number, dx: number, dy: number) {
     for (let i = 0; i < word.length; i++) {
@@ -43,24 +53,23 @@ function generateGameGridAndWords() {
     return true;
   }
   function placeWord(word: string) {
-    // Try each direction systematically
-    for (const [dx, dy] of directions) {
-      // Try multiple starting positions for each direction
-      for (let attempt = 0; attempt < 200; attempt++) {
-        const x = Math.floor(Math.random() * size);
-        const y = Math.floor(Math.random() * size);
-        if (canPlace(word, x, y, dx, dy)) {
-          for (let i = 0; i < word.length; i++) {
-            grid[x + dx * i][y + dy * i] = word[i];
-          }
-          return true;
+    const tries = size * size * 4;
+    const directions = shuffle(DIRECTIONS);
+    for (let attempt = 0; attempt < tries; attempt++) {
+      const [dx, dy] = directions[attempt % directions.length];
+      const x = Math.floor(Math.random() * size);
+      const y = Math.floor(Math.random() * size);
+      if (canPlace(word, x, y, dx, dy)) {
+        for (let i = 0; i < word.length; i++) {
+          grid[x + dx * i][y + dy * i] = word[i];
         }
+        return true;
       }
     }
     return false;
   }
   const placedWords: string[] = [];
-  selectedWords.forEach(word => {
+  shuffle(selectedWords).forEach(word => {
     if (placeWord(word)) {
       placedWords.push(word);
     } else {
